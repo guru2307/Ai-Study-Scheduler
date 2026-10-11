@@ -1,0 +1,37 @@
+<svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="60" cy="50" r="65" fill="#BBF7D0" opacity="0.3"/>
+  <circle cx="380" cy="230" r="70" fill="#FDE68A" opacity="0.2"/>
+  <rect x="30" y="90" width="44" height="148" rx="8" fill="#4ADE80"/>
+  <rect x="85" y="130" width="44" height="108" rx="8" fill="#22C55E"/>
+  <rect x="140" y="68" width="44" height="170" rx="8" fill="#16A34A"/>
+  <rect x="30" y="238" width="154" height="4" rx="2" fill="#4ADE80"/>
+  <rect x="32" y="85" width="40" height="10" rx="5" fill="#86EFAC"/>
+  <rect x="87" y="125" width="40" height="10" rx="5" fill="#86EFAC"/>
+  <rect x="142" y="63" width="40" height="10" rx="5" fill="#86EFAC"/>
+  <text x="52" y="93" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="white" font-weight="700">3h</text>
+  <text x="107" y="133" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="white" font-weight="700">5h</text>
+  <text x="162" y="71" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="white" font-weight="700">8h</text>
+  <polygon points="290,58 266,120 314,120" fill="#2563EB"/>
+  <rect x="278" y="120" width="24" height="90" rx="6" fill="#3B82F6"/>
+  <rect x="268" y="208" width="44" height="14" rx="7" fill="#1D4ED8"/>
+  <ellipse cx="290" cy="55" rx="20" ry="10" fill="#60A5FA"/>
+  <ellipse cx="290" cy="55" rx="12" ry="6" fill="#93C5FD"/>
+  <line x1="285" y1="65" x2="272" y2="110" stroke="#FDE68A" stroke-width="2" stroke-dasharray="4 3"/>
+  <line x1="295" y1="65" x2="308" y2="110" stroke="#FDE68A" stroke-width="2" stroke-dasharray="4 3"/>
+  <path d="M332 55 L337 69 L352 69 L340 78 L345 93 L332 83 L319 93 L324 78 L312 69 L327 69 Z" fill="#F59E0B"/>
+  <path d="M368 90 L372 101 L384 101 L374 108 L378 120 L368 113 L358 120 L362 108 L352 101 L364 101 Z" fill="#FCD34D" opacity="0.8"/>
+  <path d="M345 30 L348 39 L358 39 L350 45 L353 55 L345 49 L337 55 L340 45 L332 39 L342 39 Z" fill="#FBBF24" opacity="0.6"/>
+  <circle cx="248" cy="95" r="6" fill="#FDE68A"/>
+  <circle cx="240" cy="82" r="4" fill="#FCD34D"/>
+  <circle cx="253" cy="80" r="3" fill="#F59E0B"/>
+  <circle cx="360" cy="170" r="5" fill="#86EFAC"/>
+  <circle cx="395" cy="160" r="4" fill="#4ADE80" opacity="0.6"/>
+  <line x1="210" y1="100" x2="216" y2="106" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="216" y1="100" x2="210" y2="106" stroke="#22C55E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="385" y1="135" x2="391" y2="141" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <line x1="391" y1="135" x2="385" y2="141" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <rect x="196" y="35" width="90" height="28" rx="14" fill="#22C55E"/>
+  <text x="241" y="54" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="white" font-weight="900">Level Up!</text>
+  <circle cx="196" cy="49" r="10" fill="#16A34A"/>
+  <path d="M191 49 L195 53 L203 43" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

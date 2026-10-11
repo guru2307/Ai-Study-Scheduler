@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AI Study Scheduler · Learn Smarter</title>
+<meta name="description" content="Duolingo-inspired AI Study Scheduler. Smart planning, day-by-day daily quests, mock tests, and gamified progress analytics.">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#58CC02">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Study Scheduler">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32.png') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900;1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=duo10">
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ===== DUOLINGO-STYLE SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" class="brand-mascot-icon">
+        <rect x="4" y="6" width="24" height="20" rx="7" fill="#58CC02"/>
+        <rect x="6" y="8" width="20" height="16" rx="5" fill="#46A302"/>
+        <rect x="8" y="10" width="16" height="12" rx="4" fill="#58CC02"/>
+        <circle cx="12" cy="15" r="3.5" fill="#FFFFFF"/>
+        <circle cx="20" cy="15" r="3.5" fill="#FFFFFF"/>
+        <circle cx="12" cy="15" r="1.8" fill="#1E293B"/>
+        <circle cx="20" cy="15" r="1.8" fill="#1E293B"/>
+        <polygon points="16,17 14,20 18,20" fill="#FF9600"/>
+        <circle cx="10" cy="8" r="1.5" fill="#FFD900"/>
+        <circle cx="22" cy="8" r="1.5" fill="#FFD900"/>
+      </svg>
+    </div>
+    <div class="sidebar-brand-text">
+      <span class="brand-title">AI Study Scheduler</span>
+    </div>
+  </div>
+
+  <!-- Gamified Stats Widget -->
+  <div class="sidebar-stats-card">
+    <div class="stat-pill streak-pill" title="Current Daily Streak">
+      <span class="stat-icon streak-flame">🔥</span>
+      <span class="stat-value">5</span>
+      <span class="stat-label">STREAK</span>
+    </div>
+    <div class="stat-pill xp-pill" title="Study XP Earned">
+      <span class="stat-icon">💎</span>
+      <span class="stat-value">450</span>
+      <span class="stat-label">XP</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" id="main-nav">
+    <button class="nav-link active" data-page="planner" aria-label="Planner">
+      <span class="nav-icon icon-planner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+      </span>
+      <span class="nav-label">Planner</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-link" data-page="schedule" aria-label="Schedule">
+      <span class="nav-icon icon-schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+      </span>
+      <span class="nav-label">Daily Quests</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-link" data-page="notes" aria-label="Study Notes">
+      <span class="nav-icon icon-notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-1.8-1.4-4.2-2-7-2v13c2.8 0 5.2.6 7 2 1.8-1.4 4.2-2 7-2v-13c-2.8 0-5.2.6-7 2z"/><line x1="12" y1="6.5" x2="12" y2="19.5"/></svg>
+      </span>
+      <span class="nav-label">Study Notes</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-link" data-page="tests" aria-label="Mock Tests">
+      <span class="nav-icon icon-tests">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12.5l2 2 4-4.5"/></svg>
+      </span>
+      <span class="nav-label">Quiz Arena</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-link" data-page="progress" aria-label="Progress">
+      <span class="nav-icon icon-progress">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>
+      </span>
+      <span class="nav-label">Level Progress</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-link" data-page="analytics" aria-label="Analytics">
+      <span class="nav-icon icon-analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="21" x2="5" y2="12"/><line x1="12" y1="21" x2="12" y2="7"/><line x1="19" y1="21" x2="19" y2="15"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      </span>
+      <span class="nav-label">Analytics</span>
+      <span class="nav-dot"></span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="mobile-sync-btn" id="btn-mobile-sync" title="Open on Mobile / Install App" type="button">
+      <span class="sync-icon">📱</span>
+      <div class="sync-text">
+        <span class="sync-title">Open on Mobile</span>
+        <span class="sync-sub">Scan QR / Install App</span>
+      </div>
+    </button>
+    <div class="sidebar-footer-card">
+      <div class="footer-gem-icon">⚡</div>
+      <div class="footer-card-info">
+        <span class="footer-card-title">AI Engine Active</span>
+        <span class="footer-card-sub">Instant study feedback</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<header class="mobile-topbar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" style="width:26px;height:26px;">
+        <rect x="4" y="6" width="24" height="20" rx="7" fill="#58CC02"/>
+        <circle cx="12" cy="15" r="3" fill="#FFFFFF"/>
+        <circle cx="20" cy="15" r="3" fill="#FFFFFF"/>
+        <circle cx="12" cy="15" r="1.5" fill="#1E293B"/>
+        <circle cx="20" cy="15" r="1.5" fill="#1E293B"/>
+        <polygon points="16,17 14,20 18,20" fill="#FF9600"/>
+      </svg>
+    </div>
+    <span class="brand-title">AI Study Scheduler</span>
+  </div>
+  <div class="mobile-topbar-right">
+    <button class="mobile-install-top-btn hidden" id="mobile-install-top-btn" aria-label="Install App" type="button">
+      <span>📲 Install</span>
+    </button>
+    <div class="stat-pill streak-pill-sm">
+      <span>🔥 5</span>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="app-shell">
+  <main class="app-main">
+
+    <!-- ================= PLANNER PAGE ================= -->
+    <section class="page active" id="page-planner">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-planner">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-green">
+            <span class="duo-tag-icon">🌱</span>
+            <span>START YOUR QUEST</span>
+          </div>
+          <h1 class="page-title">AI Study Planner</h1>
+          <p class="page-sub">Plan smarter. Study better. Let AI organize your syllabus into high-impact, bite-sized study blocks!</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">✨ AI Workload Detection</span>
+            <span class="hero-chip">🎯 Priority Matrix</span>
+            <span class="hero-chip">⚡ Custom Pacing</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/planner-illustration.svg') }}" alt="Planner Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div class="card form-card">
+        <div class="card-header-row">
+          <div class="card-title-group">
+            <span class="card-icon-bubble bubble-green">📚</span>
+            <div>
+              <h2>Add New Subject</h2>
+              <p class="card-sub-hint">Input your course details and our AI will calculate the ideal study pacing.</p>
+            </div>
+          </div>
+          <span class="card-badge badge-green-pill">⚡ AI Enhanced</span>
+        </div>
+        <form id="subject-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-name">Subject Name</label>
+              <input type="text" id="f-name" placeholder="e.g. Mathematics, Biology" required>
+            </div>
+            <div class="field">
+              <label for="f-topic">Topic / Chapter</label>
+              <input type="text" id="f-topic" placeholder="e.g. Integration, Genetics" required>
+            </div>
+            <div class="field">
+              <label for="f-deadline">Exam / Deadline</label>
+              <input type="date" id="f-deadline" required>
+            </div>
+            <div class="field">
+              <label for="f-knowledge">Current Knowledge Level</label>
+              <select id="f-knowledge" required>
+                <option value="">Select your starting level...</option>
+                <option>Beginner</option>
+                <option>Somewhat Familiar</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-difficulty">Target Difficulty</label>
+              <select id="f-difficulty">
+                <option>Auto Detect</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+                <option>Expert</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-hours">Estimated Study Hours <span class="optional">(optional)</span></label>
+              <input type="number" id="f-hours" min="0.5" step="0.5" placeholder="AI will auto-estimate if blank">
+            </div>
+            <div class="field field-wide">
+              <label for="f-notes">Additional Context &amp; Weak Spots <span class="optional">(optional)</span></label>
+              <textarea id="f-notes" rows="2" placeholder="e.g. Struggling with trigonometry proofs, need active recall focus..."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="analyze-btn">
+            <span class="btn-label">✨ AI Analyze &amp; Add Subject</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title-row">
+          <div class="card-title-group">
+            <span class="card-icon-bubble bubble-purple">🎯</span>
+            <div>
+              <h2>Your Study Quests</h2>
+              <p class="card-sub-hint">Prioritized list based on exam dates, difficulty, and your knowledge level.</p>
+            </div>
+          </div>
+          <span class="count-badge" id="subject-count">0 subjects</span>
+        </div>
+        <div id="subjects-list" class="subjects-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12h4.2l1.6 3h5.4l1.6-3h4.2"/><path d="M5.2 6.2 3.5 12v6a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6l-1.7-5.8A2 2 0 0 0 17 4.5H7a2 2 0 0 0-1.8 1.7z"/></svg>
+            </div>
+            <p class="empty-state-text">No study quests yet! Add your first subject above to unlock your personalized AI plan.</p>
+            <div class="empty-state-action">
+              <button type="button" class="btn btn-secondary btn-sm" data-empty-action="goto-planner-form">Add First Subject</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <div class="card-title-group">
+            <span class="card-icon-bubble bubble-blue">⚙️</span>
+            <div>
+              <h2>Daily Study Preferences</h2>
+              <p class="card-sub-hint">Fine-tune your study capacity for maximum daily focus.</p>
+            </div>
+          </div>
+          <span class="card-badge badge-blue-pill">Auto-Saved</span>
+        </div>
+        <form id="preferences-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="p-hours">Study Hours Per Day</label>
+              <input type="number" id="p-hours" min="1" max="16" step="0.5" value="4" required>
+            </div>
+            <div class="field">
+              <label for="p-session">Session Length</label>
+              <select id="p-session">
+                <option>30 minutes</option>
+                <option selected>1 hour</option>
+                <option>1.5 hours</option>
+                <option>2 hours</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="p-start">Start Date</label>
+              <input type="date" id="p-start" required>
+            </div>
+            <div class="field">
+              <label for="p-time">Preferred Study Time</label>
+              <select id="p-time">
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Evening</option>
+              </select>
+            </div>
+          </div>
+        </form>
+        <button class="btn btn-primary btn-large btn-green-glow" id="generate-schedule-btn">
+          <span class="btn-label">🚀 Generate AI Study Schedule</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SCHEDULE PAGE ================= -->
+    <section class="page" id="page-schedule">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-schedule">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-blue">
+            <span class="duo-tag-icon">⚡</span>
+            <span>DAILY MISSIONS</span>
+          </div>
+          <h1 class="page-title">Daily Study Quests</h1>
+          <p class="page-sub">Conquer your sessions one by one! Tick off completed tasks to build an unbreakable study streak.</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">🔥 Streak Multiplier</span>
+            <span class="hero-chip">⏱️ Pomodoro Optimized</span>
+            <span class="hero-chip">🛡️ Conflict Shield</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/schedule-illustration.svg') }}" alt="Schedule Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div id="schedule-content"></div>
+    </section>
+
+    <!-- ================= STUDY NOTES PAGE ================= -->
+    <section class="page" id="page-notes">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-notes">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-amber">
+            <span class="duo-tag-icon">📚</span>
+            <span>KNOWLEDGE VAULT</span>
+          </div>
+          <h1 class="page-title">AI Study Notes &amp; Docs</h1>
+          <p class="page-sub">Upload your lecture notes, slides, or chapters. AI will distill high-yield takeaways and formulate mock tests!</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">📄 PDF, DOCX, TXT</span>
+            <span class="hero-chip">💡 Key Concept Extraction</span>
+            <span class="hero-chip">🎯 Direct MCQ Generation</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/notes-illustration.svg') }}" alt="Notes Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div class="card form-card">
+        <div class="card-header-row">
+          <div class="card-title-group">
+            <span class="card-icon-bubble bubble-amber">📥</span>
+            <div>
+              <h2>Upload Document</h2>
+              <p class="card-sub-hint">Supported formats: PDF, DOCX, and TXT files up to 10MB.</p>
+            </div>
+          </div>
+          <span class="card-badge badge-amber-pill">AI Document Reader</span>
+        </div>
+        <form id="upload-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="u-subject">Subject Name</label>
+              <input type="text" id="u-subject" placeholder="e.g. Database Systems, Organic Chemistry" required>
+            </div>
+            <div class="field">
+              <label for="u-topic">Topic / Unit</label>
+              <input type="text" id="u-topic" placeholder="e.g. Normalization, Reaction Mechanisms" required>
+            </div>
+          </div>
+          <div class="field field-wide" style="margin-bottom:16px;">
+            <label for="u-file">Document File</label>
+            <input type="file" id="u-file" accept=".pdf,.docx,.txt" required>
+          </div>
+          <button type="submit" class="btn btn-amber" id="upload-btn">
+            <span class="btn-label">⚡ Analyze Document with AI</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title-row">
+          <div class="card-title-group">
+            <span class="card-icon-bubble bubble-amber">📖</span>
+            <div>
+              <h2>Analyzed Documents</h2>
+              <p class="card-sub-hint">Your processed notes ready for instant mock tests and revision.</p>
+            </div>
+          </div>
+        </div>
+        <div id="documents-list" class="documents-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2.5H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 2.5 14 8 19.5 8"/><line x1="8.5" y1="13" x2="15.5" y2="13"/><line x1="8.5" y1="17" x2="15.5" y2="17"/></svg>
+            </div>
+            <p class="empty-state-text">No documents uploaded yet! Upload your notes above to turn them into interactive study sets.</p>
+            <div class="empty-state-action">
+              <button type="button" class="btn btn-secondary btn-sm" data-empty-action="focus-upload">Upload First Document</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MOCK TESTS PAGE ================= -->
+    <section class="page" id="page-tests">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-tests">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-purple">
+            <span class="duo-tag-icon">🏆</span>
+            <span>CHALLENGE ARENA</span>
+          </div>
+          <h1 class="page-title">Mock Tests &amp; Quizzes</h1>
+          <p class="page-sub">Sharpen your recall with active quizzes generated strictly from your uploaded materials. Earn XP for every right answer!</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">🎮 Duolingo Quiz Mode</span>
+            <span class="hero-chip">💎 XP &amp; Score Tracking</span>
+            <span class="hero-chip">💡 Detailed Explanations</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/tests-illustration.svg') }}" alt="Mock Tests Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div id="tests-list-view">
+        <div id="mock-tests-list" class="mock-tests-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.5"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+            </div>
+            <p class="empty-state-text">No mock tests available yet. Upload a document in Study Notes to automatically generate custom mock exams!</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="test-taking-view" class="hidden"></div>
+      <div id="test-result-view" class="hidden"></div>
+    </section>
+
+    <!-- ================= PROGRESS PAGE ================= -->
+    <section class="page" id="page-progress">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-progress">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-rose">
+            <span class="duo-tag-icon">🚀</span>
+            <span>MASTERY TRACKER</span>
+          </div>
+          <h1 class="page-title">Progress &amp; Streaks</h1>
+          <p class="page-sub">Track your learning journey in real-time. Celebrate milestones, monitor completion rates, and keep moving forward!</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">🔥 Daily Streaks</span>
+            <span class="hero-chip">📈 Velocity Gauges</span>
+            <span class="hero-chip">⭐ Badge Milestones</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/progress-illustration.svg') }}" alt="Progress Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div id="progress-content"></div>
+    </section>
+
+    <!-- ================= ANALYTICS PAGE ================= -->
+    <section class="page" id="page-analytics">
+      <!-- Duolingo Hero Banner with Restored Image -->
+      <div class="duo-hero duo-hero-analytics">
+        <div class="duo-hero-content">
+          <div class="duo-tag duo-tag-teal">
+            <span class="duo-tag-icon">📊</span>
+            <span>INTELLIGENCE RADAR</span>
+          </div>
+          <h1 class="page-title">AI Study Analytics</h1>
+          <p class="page-sub">Deep behavioral insights and time investment graphs. Uncover weak spots and get AI-powered study coaching.</p>
+          <div class="duo-hero-pills">
+            <span class="hero-chip">🤖 AI Coach Recommendations</span>
+            <span class="hero-chip">📊 Time Distribution</span>
+            <span class="hero-chip">🎯 Exam Readiness Index</span>
+          </div>
+        </div>
+        <div class="duo-hero-art">
+          <img src="{{ url_for('static', filename='images/analytics-illustration.svg') }}" alt="Analytics Character" class="hero-character duo-float">
+        </div>
+      </div>
+
+      <div id="analytics-content"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Sidebar backdrop for mobile -->
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+<!-- ===== MOBILE BOTTOM NAVIGATION ===== -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="bottom-nav-link active" data-page="planner" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+    <span>Planner</span>
+  </button>
+  <button class="bottom-nav-link" data-page="schedule" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+    <span>Quests</span>
+  </button>
+  <button class="bottom-nav-link" data-page="notes" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-1.8-1.4-4.2-2-7-2v13c2.8 0 5.2.6 7 2 1.8-1.4 4.2-2 7-2v-13c-2.8 0-5.2.6-7 2z"/><line x1="12" y1="6.5" x2="12" y2="19.5"/></svg>
+    <span>Notes</span>
+  </button>
+  <button class="bottom-nav-link" data-page="tests" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12.5l2 2 4-4.5"/></svg>
+    <span>Quizzes</span>
+  </button>
+  <button class="bottom-nav-link" data-page="analytics" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="21" x2="5" y2="12"/><line x1="12" y1="21" x2="12" y2="7"/><line x1="19" y1="21" x2="19" y2="15"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+    <span>Stats</span>
+  </button>
+</nav>
+
+<!-- ===== PWA INSTALL PROMPT BANNER ===== -->
+<div class="pwa-install-banner hidden" id="pwa-install-banner">
+  <div class="pwa-install-content">
+    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AI Study Scheduler Icon" class="pwa-banner-icon">
+    <div class="pwa-banner-text">
+      <strong>Install AI Study Scheduler</strong>
+      <span>Native mobile experience & fast access</span>
+    </div>
+  </div>
+  <div class="pwa-banner-actions">
+    <button class="btn btn-sm btn-duo-green" id="btn-pwa-install" type="button">Install</button>
+    <button class="btn-pwa-dismiss" id="btn-pwa-dismiss" aria-label="Dismiss" type="button">✕</button>
+  </div>
+</div>
+
+<!-- ===== MOBILE SYNC / QR MODAL ===== -->
+<div class="modal-overlay hidden" id="mobile-sync-modal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon">📱</span>
+        <div>
+          <h3>Use AI Study Scheduler on Mobile</h3>
+          <p>Install on your phone or access directly via Wi-Fi</p>
+        </div>
+      </div>
+      <button class="modal-close-btn" id="btn-close-sync-modal" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="qr-card">
+        <div class="qr-code-box" id="qr-code-box">
+          <img id="qr-code-img" src="" alt="Scan QR Code to open on mobile" class="qr-img">
+        </div>
+        <p class="qr-hint">Scan with your phone camera (PC & phone must be on the same Wi-Fi)</p>
+      </div>
+
+      <div class="mobile-url-box">
+        <label for="mobile-url-input">Or enter this address in your mobile browser:</label>
+        <div class="url-input-group">
+          <input type="text" id="mobile-url-input" readonly value="">
+          <button class="btn btn-secondary btn-sm" id="btn-copy-mobile-url" type="button">Copy</button>
+        </div>
+      </div>
+
+      <div class="install-instructions">
+        <div class="instruction-row">
+          <span class="platform-badge badge-android">🤖 Android</span>
+          <p>Open in Chrome → Tap the <strong>"Install"</strong> prompt, or tap <strong>⋮ → Add to Home screen</strong>. It will install with an app icon!</p>
+        </div>
+        <div class="instruction-row">
+          <span class="platform-badge badge-ios">🍎 iPhone</span>
+          <p>Open in Safari → Tap <strong>Share</strong> (square with arrow) → Tap <strong>"Add to Home Screen"</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MCQ count inline panel template -->
+<template id="tpl-mcq-panel">
+  <div class="mcq-generate-panel card">
+    <h3></h3>
+    <p class="muted"></p>
+    <div class="mcq-count-options">
+      <button class="btn btn-secondary" data-count="5">5 Questions</button>
+      <button class="btn btn-secondary" data-count="10">10 Questions</button>
+      <button class="btn btn-secondary" data-count="20">20 Questions</button>
+    </div>
+  </div>
+</template>
+
+<script src="{{ url_for('static', filename='script.js') }}?v=duo10"></script>
+</body>
+</html>
